@@ -1,0 +1,9 @@
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\bin\Debug\netstandard2.0\CSDBDataGenLibrary.deps.json
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\bin\Debug\netstandard2.0\CSDBDataGenLibrary.dll
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\bin\Debug\netstandard2.0\CSDBDataGenLibrary.pdb
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\obj\Debug\netstandard2.0\CSDBDataGenLibrary.csprojAssemblyReference.cache
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\obj\Debug\netstandard2.0\CSDBDataGenLibrary.AssemblyInfoInputs.cache
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\obj\Debug\netstandard2.0\CSDBDataGenLibrary.AssemblyInfo.cs
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\obj\Debug\netstandard2.0\CSDBDataGenLibrary.csproj.CoreCompileInputs.cache
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\obj\Debug\netstandard2.0\CSDBDataGenLibrary.dll
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGenLibrary\obj\Debug\netstandard2.0\CSDBDataGenLibrary.pdb

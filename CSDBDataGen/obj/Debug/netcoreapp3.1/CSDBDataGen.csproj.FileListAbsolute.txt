@@ -1,0 +1,17 @@
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\CSDBDataGen.exe
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\CSDBDataGen.deps.json
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\CSDBDataGen.runtimeconfig.json
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\CSDBDataGen.runtimeconfig.dev.json
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\CSDBDataGen.dll
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\CSDBDataGen.pdb
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\CSDBDataGenLibrary.dll
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\CSDBDataGenLibrary.pdb
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\obj\Debug\netcoreapp3.1\CSDBDataGen.csprojAssemblyReference.cache
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\obj\Debug\netcoreapp3.1\CSDBDataGen.AssemblyInfoInputs.cache
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\obj\Debug\netcoreapp3.1\CSDBDataGen.AssemblyInfo.cs
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\obj\Debug\netcoreapp3.1\CSDBDataGen.csproj.CoreCompileInputs.cache
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\obj\Debug\netcoreapp3.1\CSDBDataGen.csproj.CopyComplete
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\obj\Debug\netcoreapp3.1\CSDBDataGen.dll
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\obj\Debug\netcoreapp3.1\CSDBDataGen.pdb
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\obj\Debug\netcoreapp3.1\CSDBDataGen.genruntimeconfig.cache
+C:\Users\giodu\VSCode_projects\c_sharp\CSDBDataGen\CSDBDataGen\bin\Debug\netcoreapp3.1\Npgsql.dll

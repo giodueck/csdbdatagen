@@ -1,0 +1,11 @@
+Generators:
+// award, // requirement
+// person
+// p_award, // p_requirement
+// leader, // l_history, lt_history
+// office
+// outpost
+// d_category
+// division
+team
+// scout, // s_history, st_history

@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "NfmiPuo77S4grNNvT+BvfkoedRr/NBoMs80pxOl4astBEl4k1hkSj7hoMcEKUQhJNiyJGSv2VHUVX3SVGGtl7A==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\giodu\\VSCode_projects\\c_sharp\\CSDBDataGen\\CSDBDataGen\\CSDBDataGen.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\giodu\\.nuget\\packages\\npgsql\\5.0.5\\npgsql.5.0.5.nupkg.sha512",
+    "C:\\Users\\giodu\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.6.0\\system.runtime.compilerservices.unsafe.4.6.0.nupkg.sha512"
+  ],
+  "logs": []
+}
