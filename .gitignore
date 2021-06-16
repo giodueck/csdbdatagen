@@ -1,0 +1,6 @@
+.vscode
+*/.vscode
+*/bin
+*/obj
+*.cache
+TODO.txt

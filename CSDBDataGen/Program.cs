@@ -33,7 +33,7 @@ namespace CSDBDataGen
         }
 
         // Generates persons and automatically makes them scouts
-        static void GenScouts(NpgsqlConnection conn, int count, ref List<long> personIds, ref List<long> scoutIds, DateTime minBirthday, DateTime maxBirthday, DateTime startDate, char gender = ' ', int teamId = 0)
+        static void GenScouts(NpgsqlConnection conn, int count, ref List<long> personIds, ref List<long> scoutIds, DateTime minBirthday, DateTime maxBirthday, DateTime startDate, char gender = ' ', long teamId = 0)
         {
             CSDBDataGenLibrary.PersonGenerator.Generate(conn, ref personIds, count, minBirthday, maxBirthday, gender);
             CSDBDataGenLibrary.PersonGenerator.MakeScout(conn, ref scoutIds, personIds, startDate, teamId);
@@ -71,6 +71,7 @@ namespace CSDBDataGen
             var officeIds = new List<long>();
             var outpostIds = new List<long>();
             var divisionIds = new List<long>();
+            var teamIds = new List<long>();
 
             var auxList = new List<long>();
             var auxList2 = new List<long>();
@@ -144,12 +145,28 @@ namespace CSDBDataGen
 
             // Division
             auxList.Clear();
+            auxList2.Clear();
             personIds.Clear();
             GenLeaders(conn, divisionCategoryIds.Count, ref personIds, ref auxList, leaderMinBD, leaderMaxBD, startDate);
             personIds.Clear();
             GenLeaders(conn, divisionCategoryIds.Count, ref personIds, ref auxList2, leaderMinBD, leaderMaxBD, startDate);
             leaderIds.AddRange(auxList);
             CSDBDataGenLibrary.DivisionGenerator.Generate(conn, ref divisionIds, outpostIds[0], divisionCategoryIds, auxList, auxList2);
+
+            // Teams
+            auxList.Clear();
+            auxList2.Clear();
+            personIds.Clear();
+            GenLeaders(conn, 1, ref personIds, ref auxList, leaderMinBD, leaderMaxBD, startDate, 'M');
+            personIds.Clear();
+            GenLeaders(conn, 1, ref personIds, ref auxList2, leaderMinBD, leaderMaxBD, startDate, 'M', true);
+            leaderIds.AddRange(auxList);
+            CSDBDataGenLibrary.TeamGenerator.Generate(conn, ref teamIds, divisionIds[0], auxList, auxList2, 'M', startDate);
+
+            // Scouts
+            personIds.Clear();
+            GenScouts(conn, 10, ref personIds, ref scoutIds, leaderMinBD, leaderMaxBD, startDate, 'M', teamIds[0]);
+            CSDBDataGenLibrary.PersonGenerator.Pause(conn, personIds, new DateTime(2020, 1, 1), new DateTime(2021, 1, 1), 0);
 
             System.Console.WriteLine("End");
         }
