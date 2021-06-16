@@ -13,7 +13,7 @@ namespace DBDataGenLibrary
             cmd.Connection = conn;
 
             // Build sql
-            string sql = "INSERT INTO person (person_id, first_name, last_name, date_of_birth, gender) VALUES ";
+            string sql = "INSERT INTO person (first_name, last_name, date_of_birth, gender) VALUES ";
 
             char[] genders = {'M', 'F'};
             bool none = false;
@@ -23,17 +23,11 @@ namespace DBDataGenLibrary
             var rand = new Random();
             NpgsqlTypes.NpgsqlDate bday;
             string fn, ln;
-            long person_id;
 
             for (int i = 0; i < count; i++)
             {
                 if (i > 0)
                     sql += ",";
-
-                // Get next person_id
-                cmd.CommandText = "SELECT * FROM nextval('person_person_id_seq')";
-                person_id = (long)cmd.ExecuteScalar();
-                personIds.Add((long)person_id);
 
                 // first_name
                 if (none) gender = genders[rand.Next(2)];
@@ -46,11 +40,11 @@ namespace DBDataGenLibrary
                 bday = DateGenerator.Generate(minBirthday, maxBirthday);
 
                 // sql
-                sql += String.Format("({0}, '{1}', '{2}', '{3}', '{4}')", person_id.ToString(), fn, ln, bday, gender);
+                sql += String.Format("('{0}', '{1}', '{2}', '{3}')", fn, ln, bday, gender);
             }
             
-            cmd.CommandText = sql;
-            cmd.ExecuteNonQuery();
+            cmd.CommandText = sql + " RETURNING person_id";
+            IDReader.Read(cmd.ExecuteReader(), ref personIds);
         }
 
         public static void MakeLeader(NpgsqlConnection conn, ref List<long> leaderIds, List<long> personIds, bool isJunior, DateTime startDate, bool rejoing = false)
@@ -60,10 +54,8 @@ namespace DBDataGenLibrary
             cmd.Connection = conn;
 
             // Build sql
-            string sql = "INSERT INTO leader (leader_id, person_id, is_junior) VALUES ";
-            string history = "INSERT INTO leader_history (leader_history_id, person_id, start_date, is_junior) VALUES ";
-
-            long leader_id = 0, leader_history_id;
+            string sql = "INSERT INTO leader (person_id, is_junior) VALUES ";
+            string history = "INSERT INTO leader_history (person_id, start_date, is_junior) VALUES ";
 
             foreach (int person_id in personIds)
             {
@@ -73,27 +65,19 @@ namespace DBDataGenLibrary
                     history += ",";
                 }
 
-                // Get next leader_id
-                if (!rejoing)
-                {
-                    cmd.CommandText = "SELECT * FROM nextval('leader_leader_id_seq_1_1')";
-                    leader_id = (long)cmd.ExecuteScalar();
-                    leaderIds.Add((long)leader_id);
-                }
-
-                // Get next leader_history_id
-                cmd.CommandText = "SELECT * FROM nextval('leader_history_leader_history_id_seq')";
-                leader_history_id = (long)cmd.ExecuteScalar();
-
                 // sql
-                if (!rejoing) sql += String.Format("({0}, {1}, {2})", leader_id.ToString(), person_id.ToString(), isJunior.ToString());
-                history += String.Format("({0}, {1}, '{2}', {3})", leader_history_id.ToString(), person_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate), isJunior.ToString());
+                if (!rejoing) sql += String.Format("({0}, {1})", person_id.ToString(), isJunior.ToString());
+                history += String.Format("({0}, '{1}', {2})", person_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate), isJunior.ToString());
             }
 
+            // Store leader_ids
             if (!rejoing)
-                cmd.CommandText = sql + ";" + history;
-            else
-                cmd.CommandText = history;
+            {
+                cmd.CommandText = sql + " RETURNING leader_id";
+                IDReader.Read(cmd.ExecuteReader(), ref leaderIds);
+            }
+            
+            cmd.CommandText = history;
             cmd.ExecuteNonQuery();
         }
 
@@ -104,10 +88,8 @@ namespace DBDataGenLibrary
             cmd.Connection = conn;
 
             // Build sql
-            string sql = "INSERT INTO leader (leader_id, person_id, is_junior) VALUES ";
-            string history = "INSERT INTO leader_history (leader_history_id, person_id, start_date, is_junior) VALUES ";
-
-            long leader_id = 0, leader_history_id;
+            string sql = "INSERT INTO leader (person_id, is_junior) VALUES ";
+            string history = "INSERT INTO leader_history (person_id, start_date, is_junior) VALUES ";
 
             foreach (int person_id in personIds)
             {
@@ -117,27 +99,19 @@ namespace DBDataGenLibrary
                     history += ",";
                 }
 
-                // Get next leader_id
-                if (!rejoing)
-                {
-                    cmd.CommandText = "SELECT * FROM nextval('leader_leader_id_seq_1_1')";
-                    leader_id = (long)cmd.ExecuteScalar();
-                    leaderIds.Add((long)leader_id);
-                }
-
-                // Get next leader_history_id
-                cmd.CommandText = "SELECT * FROM nextval('leader_history_leader_history_id_seq')";
-                leader_history_id = (long)cmd.ExecuteScalar();
-
                 // sql
-                if (!rejoing) sql += String.Format("({0}, {1}, {2})", leader_id.ToString(), person_id.ToString(), isJunior.ToString());
-                history += String.Format("({0}, {1}, '{2}', {3})", leader_history_id.ToString(), person_id.ToString(), startDate, isJunior.ToString());
+                if (!rejoing) sql += String.Format("({0}, {1})", person_id.ToString(), isJunior.ToString());
+                history += String.Format("({0}, '{1}', {2})", person_id.ToString(), startDate, isJunior.ToString());
             }
 
+            // Store leader_ids
             if (!rejoing)
-                cmd.CommandText = sql + ";" + history;
-            else
-                cmd.CommandText = history;
+            {
+                cmd.CommandText = sql + " RETURNING leader_id";
+                IDReader.Read(cmd.ExecuteReader(), ref leaderIds);
+            }
+            
+            cmd.CommandText = history;
             cmd.ExecuteNonQuery();
         }
 
@@ -148,11 +122,8 @@ namespace DBDataGenLibrary
             cmd.Connection = conn;
 
             // Build sql
-            string sql = "INSERT INTO scout (scout_id, person_id, team_id) VALUES ";
-            string history = "INSERT INTO scout_history (scout_history_id, person_id, start_date) VALUES ";
-            string thistory = "INSERT INTO scout_team_history (scout_team_history_id, team_id, scout_id, join_date) VALUES ";
-
-            long scout_id = 0, scout_history_id, scout_team_history_id = 0;
+            string sql = "INSERT INTO scout (person_id, team_id) VALUES ";
+            string history = "INSERT INTO scout_history (person_id, start_date) VALUES ";
 
             foreach (int person_id in personIds)
             {
@@ -160,39 +131,28 @@ namespace DBDataGenLibrary
                 {
                     sql += ",";
                     history += ",";
-                    thistory += ",";
-                }
-
-                // Get next scout_id
-                if (!rejoining)
-                {
-                    cmd.CommandText = "SELECT * FROM nextval('scout_scout_id_seq')";
-                    scout_id = (long)cmd.ExecuteScalar();
-                    scoutIds.Add((long)scout_id);
-                }
-
-                // Get next scout_history_id
-                cmd.CommandText = "SELECT * FROM nextval('scout_history_scout_history_id_seq')";
-                scout_history_id = (long)cmd.ExecuteScalar();
-
-                // Get next scout_team_history_id
-                if (teamId > 0)
-                {
-                    cmd.CommandText = "SELECT * FROM nextval('scout_team_history_scout_team_history_id_seq')";
-                    scout_team_history_id = (long)cmd.ExecuteScalar();
                 }
 
                 // sql
-                if (!rejoining) sql += String.Format("({0}, {1}, {2})", scout_id.ToString(), person_id.ToString(), (teamId > 0) ? teamId.ToString() : "null");
-                history += String.Format("({0}, {1}, '{2}')", scout_history_id.ToString(), person_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate));
-                if (teamId > 0) thistory += String.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id.ToString(), (teamId > 0) ? teamId.ToString() : "null", scout_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate));
+                if (!rejoining) sql += String.Format("({0}, {1})", person_id.ToString(), (teamId > 0) ? teamId.ToString() : "null");
+                history += String.Format("({0}, '{1}')", person_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate));
             }
 
+            // Store ids
             if (!rejoining)
-                cmd.CommandText = sql + ";" + history;
-            else 
-                cmd.CommandText = history;
-            if (teamId > 0) cmd.CommandText += ";" + thistory;
+            {
+                cmd.CommandText = sql + " RETURNING scout_id";
+                IDReader.Read(cmd.ExecuteReader(), ref scoutIds);
+            }
+
+            // join team
+            if (teamId > 0)
+            {
+                foreach (long scout_id in scoutIds)
+                    JoinTeam(conn, scout_id, teamId, new NpgsqlTypes.NpgsqlDate(startDate));
+            }
+
+            cmd.CommandText = history;
             cmd.ExecuteNonQuery();
         }
 
@@ -203,55 +163,37 @@ namespace DBDataGenLibrary
             cmd.Connection = conn;
 
             // Build sql
-            string sql = "";
-            if (!rejoining) sql = "INSERT INTO scout (scout_id, person_id, team_id) VALUES ";
-            string history = "INSERT INTO scout_history (scout_history_id, person_id, start_date) VALUES ";
-            string thistory = "INSERT INTO scout_team_history (scout_team_history_id, team_id, scout_id, join_date) VALUES ";
-
-            long scout_id = 0, scout_history_id, scout_team_history_id = 0;
+            string sql = "INSERT INTO scout (person_id, team_id) VALUES ";
+            string history = "INSERT INTO scout_history (person_id, start_date) VALUES ";
 
             foreach (int person_id in personIds)
             {
                 if (personIds[0] != person_id)
                 {
-                    if (!rejoining) sql += ",";
-                    else sql += ";";
+                    sql += ",";
                     history += ",";
-                    thistory += ",";
-                }
-
-                // Get next scout_id
-                if (!rejoining)
-                {
-                    cmd.CommandText = "SELECT * FROM nextval('scout_scout_id_seq')";
-                    scout_id = (long)cmd.ExecuteScalar();
-                    scoutIds.Add((long)scout_id);
-                } else
-                {
-                    cmd.CommandText = "SELECT scout_id FROM scout WHERE person_id = " + person_id;
-                    scout_id = (int)cmd.ExecuteScalar();
-                }
-
-                // Get next scout_history_id
-                cmd.CommandText = "SELECT * FROM nextval('scout_history_scout_history_id_seq')";
-                scout_history_id = (long)cmd.ExecuteScalar();
-
-                // Get next scout_team_history_id
-                if (teamId > 0)
-                {
-                    cmd.CommandText = "SELECT * FROM nextval('scout_team_history_scout_team_history_id_seq')";
-                    scout_team_history_id = (long)cmd.ExecuteScalar();
                 }
 
                 // sql
-                if (!rejoining) sql += String.Format("({0}, {1}, {2})", scout_id.ToString(), person_id.ToString(), (teamId > 0) ? teamId.ToString() : "null");
-                else sql += string.Format("UPDATE scout SET team_id = {0} WHERE scout_id = {1}", (teamId > 0) ? teamId.ToString() : "null", scout_id);
-                history += String.Format("({0}, {1}, '{2}')", scout_history_id.ToString(), person_id.ToString(), startDate);
-                thistory += String.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id.ToString(), (teamId > 0) ? teamId.ToString() : "null", scout_id, new NpgsqlTypes.NpgsqlDate(startDate));
+                if (!rejoining) sql += String.Format("({0}, {1})", person_id.ToString(), (teamId > 0) ? teamId.ToString() : "null");
+                history += String.Format("({0}, '{1}')", person_id.ToString(), startDate);
             }
 
-            cmd.CommandText = sql + ";" + history;
-            if (teamId > 0) cmd.CommandText += ";" + thistory;
+            // Store ids
+            if (!rejoining)
+            {
+                cmd.CommandText = sql + " RETURNING scout_id";
+                IDReader.Read(cmd.ExecuteReader(), ref scoutIds);
+            }
+
+            // join team
+            if (teamId > 0)
+            {
+                foreach (long scout_id in scoutIds)
+                    JoinTeam(conn, scout_id, teamId, startDate);
+            }
+
+            cmd.CommandText = history;
             cmd.ExecuteNonQuery();
         }
 
@@ -262,7 +204,6 @@ namespace DBDataGenLibrary
             var cmd = new NpgsqlCommand();
             cmd.Connection = conn;
 
-            string sql;
             var pauseDate = DateGenerator.Generate(minDate, maxDate);
             var resumeDate = pauseDate.AddDays(30);
             var list = new List<long>();
@@ -270,8 +211,7 @@ namespace DBDataGenLibrary
             foreach (long person_id in personIds)
             {
                 // update leader_history
-                sql = string.Format("UPDATE leader_history SET end_date = '{0}' WHERE end_date IS null AND person_id = {1}", pauseDate.ToString(), person_id.ToString());
-                cmd.CommandText = sql;
+                cmd.CommandText = string.Format("UPDATE leader_history SET end_date = '{0}' WHERE end_date IS null AND person_id = {1}", pauseDate.ToString(), person_id.ToString());
                 cmd.ExecuteNonQuery();
             }
 

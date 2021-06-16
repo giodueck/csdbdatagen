@@ -13,27 +13,22 @@ namespace DBDataGenLibrary
             cmd.Connection = conn;
 
             // Build sql
-            string sql = "INSERT INTO office (office_id, leader_id, vice_leader_id, region) VALUES ";
+            string sql = "INSERT INTO office (leader_id, vice_leader_id, region) VALUES ";
 
             var regionGen = new PlaceNameGenerator();
-            long office_id;
 
             foreach (long leader_id in leaderIds)
             {
                 if (leaderIds[0] != leader_id)
                     sql += ",";
-                
-                // Get next office_id
-                cmd.CommandText = "SELECT * FROM nextval('office_office_id_seq')";
-                office_id = (long)cmd.ExecuteScalar();
-                officeIds.Add((long)office_id);
 
                 // sql
-                sql += string.Format("({0}, {1}, {2}, '{3}')", office_id, leader_id, viceLeaderIds[leaderIds.IndexOf(leader_id)], regionGen.Generate());
+                sql += string.Format("({0}, {1}, '{2}')",leader_id, viceLeaderIds[leaderIds.IndexOf(leader_id)], regionGen.Generate());
             }
 
-            cmd.CommandText = sql;
-            cmd.ExecuteNonQuery();
+            // Store ids
+            cmd.CommandText = sql + " RETURNING office_id";
+            IDReader.Read(cmd.ExecuteReader(), ref officeIds);
         }
     }
 }
