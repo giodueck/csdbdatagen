@@ -52,7 +52,7 @@ namespace CSDBDataGenLibrary
             cmd.CommandText = sql + ";" + history;
             cmd.ExecuteNonQuery();
         }
-
+        
         public static void ReplaceLeader(NpgsqlConnection conn, long teamId, long newLeaderId, bool isJunior, DateTime replaceDate)
         {
             // Create command variable

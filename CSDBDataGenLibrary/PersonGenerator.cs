@@ -153,7 +153,6 @@ namespace CSDBDataGenLibrary
             string thistory = "INSERT INTO scout_team_history (scout_team_history_id, team_id, scout_id, join_date) VALUES ";
 
             long scout_id = 0, scout_history_id, scout_team_history_id = 0;
-            long curr_scout_id = 0;
 
             foreach (int person_id in personIds)
             {
@@ -181,18 +180,12 @@ namespace CSDBDataGenLibrary
                 {
                     cmd.CommandText = "SELECT * FROM nextval('scout_team_history_scout_team_history_id_seq')";
                     scout_team_history_id = (long)cmd.ExecuteScalar();
-                    if (scout_id == 0)
-                    {
-                        cmd.CommandText = "SELECT scout_id FROM scout WHERE person_id = " + person_id;
-                        curr_scout_id = (long)cmd.ExecuteScalar();
-                    } else
-                        curr_scout_id = scout_id;
                 }
 
                 // sql
                 if (!rejoining) sql += String.Format("({0}, {1}, {2})", scout_id.ToString(), person_id.ToString(), (teamId > 0) ? teamId.ToString() : "null");
                 history += String.Format("({0}, {1}, '{2}')", scout_history_id.ToString(), person_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate));
-                if (teamId > 0) thistory += String.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id.ToString(), (teamId > 0) ? teamId.ToString() : "null", curr_scout_id, new NpgsqlTypes.NpgsqlDate(startDate));
+                if (teamId > 0) thistory += String.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id.ToString(), (teamId > 0) ? teamId.ToString() : "null", scout_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate));
             }
 
             if (!rejoining)
@@ -361,7 +354,7 @@ namespace CSDBDataGenLibrary
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
         }
-
+        
         // Causes the given leader to join the given team.
         public static void JoinTeam(NpgsqlConnection conn, long leaderId, bool isJunior, long teamId, NpgsqlTypes.NpgsqlDate joinDate)
         {
