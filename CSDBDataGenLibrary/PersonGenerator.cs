@@ -153,6 +153,7 @@ namespace CSDBDataGenLibrary
             string thistory = "INSERT INTO scout_team_history (scout_team_history_id, team_id, scout_id, join_date) VALUES ";
 
             long scout_id = 0, scout_history_id, scout_team_history_id = 0;
+            long curr_scout_id = 0;
 
             foreach (int person_id in personIds)
             {
@@ -180,12 +181,18 @@ namespace CSDBDataGenLibrary
                 {
                     cmd.CommandText = "SELECT * FROM nextval('scout_team_history_scout_team_history_id_seq')";
                     scout_team_history_id = (long)cmd.ExecuteScalar();
+                    if (scout_id == 0)
+                    {
+                        cmd.CommandText = "SELECT scout_id FROM scout WHERE person_id = " + person_id;
+                        curr_scout_id = (long)cmd.ExecuteScalar();
+                    } else
+                        curr_scout_id = scout_id;
                 }
 
                 // sql
                 if (!rejoining) sql += String.Format("({0}, {1}, {2})", scout_id.ToString(), person_id.ToString(), (teamId > 0) ? teamId.ToString() : "null");
                 history += String.Format("({0}, {1}, '{2}')", scout_history_id.ToString(), person_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate));
-                if (teamId > 0) thistory += String.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id.ToString(), (teamId > 0) ? teamId.ToString() : "null", scout_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate));
+                if (teamId > 0) thistory += String.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id.ToString(), (teamId > 0) ? teamId.ToString() : "null", curr_scout_id, new NpgsqlTypes.NpgsqlDate(startDate));
             }
 
             if (!rejoining)
@@ -196,14 +203,15 @@ namespace CSDBDataGenLibrary
             cmd.ExecuteNonQuery();
         }
 
-        public static void MakeScout(NpgsqlConnection conn, ref List<long> scoutIds, List<long> personIds, NpgsqlTypes.NpgsqlDate startDate, int teamId = 0, bool rejoining = false)
+        public static void MakeScout(NpgsqlConnection conn, ref List<long> scoutIds, List<long> personIds, NpgsqlTypes.NpgsqlDate startDate, long teamId = 0, bool rejoining = false)
         {
             // Create command variable
             var cmd = new NpgsqlCommand();
             cmd.Connection = conn;
 
             // Build sql
-            string sql = "INSERT INTO scout (scout_id, person_id, team_id) VALUES ";
+            string sql = "";
+            if (!rejoining) sql = "INSERT INTO scout (scout_id, person_id, team_id) VALUES ";
             string history = "INSERT INTO scout_history (scout_history_id, person_id, start_date) VALUES ";
             string thistory = "INSERT INTO scout_team_history (scout_team_history_id, team_id, scout_id, join_date) VALUES ";
 
@@ -213,7 +221,8 @@ namespace CSDBDataGenLibrary
             {
                 if (personIds[0] != person_id)
                 {
-                    sql += ",";
+                    if (!rejoining) sql += ",";
+                    else sql += ";";
                     history += ",";
                     thistory += ",";
                 }
@@ -224,6 +233,10 @@ namespace CSDBDataGenLibrary
                     cmd.CommandText = "SELECT * FROM nextval('scout_scout_id_seq')";
                     scout_id = (long)cmd.ExecuteScalar();
                     scoutIds.Add((long)scout_id);
+                } else
+                {
+                    cmd.CommandText = "SELECT scout_id FROM scout WHERE person_id = " + person_id;
+                    scout_id = (int)cmd.ExecuteScalar();
                 }
 
                 // Get next scout_history_id
@@ -239,14 +252,12 @@ namespace CSDBDataGenLibrary
 
                 // sql
                 if (!rejoining) sql += String.Format("({0}, {1}, {2})", scout_id.ToString(), person_id.ToString(), (teamId > 0) ? teamId.ToString() : "null");
+                else sql += string.Format("UPDATE scout SET team_id = {0} WHERE scout_id = {1}", (teamId > 0) ? teamId.ToString() : "null", scout_id);
                 history += String.Format("({0}, {1}, '{2}')", scout_history_id.ToString(), person_id.ToString(), startDate);
-                thistory += String.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id.ToString(), (teamId > 0) ? teamId.ToString() : "null", scout_id.ToString(), new NpgsqlTypes.NpgsqlDate(startDate));
+                thistory += String.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id.ToString(), (teamId > 0) ? teamId.ToString() : "null", scout_id, new NpgsqlTypes.NpgsqlDate(startDate));
             }
 
-            if (!rejoining)
-                cmd.CommandText = sql + ";" + history;
-            else 
-                cmd.CommandText = history;
+            cmd.CommandText = sql + ";" + history;
             if (teamId > 0) cmd.CommandText += ";" + thistory;
             cmd.ExecuteNonQuery();
         }
@@ -276,28 +287,43 @@ namespace CSDBDataGenLibrary
         }
 
         // Causes the scout history to show a random 30 day pause in participation for the given persons
-        public static void Pause(NpgsqlConnection conn, List<long> personIds, DateTime minDate, DateTime maxDate, int teamId)
+        public static void Pause(NpgsqlConnection conn, List<long> personIds, DateTime minDate, DateTime maxDate, long teamId)
         {
             // Create command variable
             var cmd = new NpgsqlCommand();
             cmd.Connection = conn;
 
-            string sql;
             var pauseDate = DateGenerator.Generate(minDate, maxDate);
             var resumeDate = pauseDate.AddDays(30);
             var list = new List<long>();
+            NpgsqlDataReader reader;
+            long scout_id;
         
             foreach (long person_id in personIds)
             {
                 // update scout_history
-                sql = string.Format("UPDATE scout_history SET end_date = '{0}' WHERE end_date IS null AND person_id = {1};", pauseDate.ToString(), person_id.ToString());
-                cmd.CommandText = sql;
+                cmd.CommandText = string.Format("UPDATE scout_history SET end_date = '{0}' WHERE end_date IS null AND person_id = {1};", pauseDate.ToString(), person_id.ToString());
                 cmd.ExecuteNonQuery();
 
-                // leave team function to do
+                // leave team too
+                cmd.CommandText = "SELECT team_id, scout_id FROM scout WHERE person_id = " + person_id;
+                reader = cmd.ExecuteReader();
+                try
+                {
+                    reader.Read();
+                    reader.GetInt64(0).ToString();  // will throw exception if team_id is null
+                    scout_id = reader.GetInt64(1);
+                    reader.Close();
+                    LeaveTeam(conn, scout_id, pauseDate);
+                }
+                catch (System.Exception)
+                {
+                    reader.Close();
+                    // System.Console.WriteLine(e.ToString());
+                }
             }
 
-            // new leader_history rows
+            // new scout_history rows
             MakeScout(conn, ref list, personIds, resumeDate, teamId, true);
         }
 
@@ -331,6 +357,27 @@ namespace CSDBDataGenLibrary
             scout_team_history_id = (long)cmd.ExecuteScalar();
 
             sql += string.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id, teamId, scoutId, joinDate);
+
+            cmd.CommandText = sql;
+            cmd.ExecuteNonQuery();
+        }
+
+        // Causes the given leader to join the given team.
+        public static void JoinTeam(NpgsqlConnection conn, long leaderId, bool isJunior, long teamId, NpgsqlTypes.NpgsqlDate joinDate)
+        {
+            // Create command variable
+            var cmd = new NpgsqlCommand();
+            cmd.Connection = conn;
+
+            string sql = "INSERT INTO leader_team_history (leader_team_history_id, team_id, leader_id, is_junior, join_date) VALUES ";
+
+            long leader_team_history_id;
+
+            // Get next leader_team_history_id
+            cmd.CommandText = "SELECT * FROM nextval('leader_team_history_leader_team_history_id_seq')";
+            leader_team_history_id = (long)cmd.ExecuteScalar();
+
+            sql += string.Format("({0}, {1}, {2}, {3}, '{4}')", leader_team_history_id, teamId, leaderId, isJunior, joinDate);
 
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();

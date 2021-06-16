@@ -52,5 +52,39 @@ namespace CSDBDataGenLibrary
             cmd.CommandText = sql + ";" + history;
             cmd.ExecuteNonQuery();
         }
+
+        public static void ReplaceLeader(NpgsqlConnection conn, long teamId, long newLeaderId, bool isJunior, DateTime replaceDate)
+        {
+            // Create command variable
+            var cmd = new NpgsqlCommand();
+            cmd.Connection = conn;
+
+            int old_leader_id;  // for some reason this time the id is int32 and not int64
+
+            // get old leader
+            if (isJunior)
+            {
+                cmd.CommandText = "SELECT leader_id FROM team WHERE team_id = " + teamId;
+                old_leader_id = (int)cmd.ExecuteScalar();
+            } else
+            {
+                cmd.CommandText = "SELECT junior_leader_id FROM team WHERE team_id = " + teamId;
+                old_leader_id = (int)cmd.ExecuteScalar();
+            }
+
+            // old leader leaves
+            cmd.CommandText = string.Format("UPDATE leader_team_history SET leave_date = '{0}' WHERE leave_date IS null AND leader_id = {1};", new NpgsqlTypes.NpgsqlDate(replaceDate), old_leader_id);
+            cmd.ExecuteNonQuery();
+
+            // new leader joins
+            PersonGenerator.JoinTeam(conn, newLeaderId, isJunior, teamId, new NpgsqlTypes.NpgsqlDate(replaceDate));
+
+            // update team
+            if (isJunior)
+                cmd.CommandText = string.Format("UPDATE team SET leader_id = {0} WHERE team_id = {1}", teamId, newLeaderId);
+            else
+                cmd.CommandText = string.Format("UPDATE team SET junior_leader_id = {0} WHERE team_id = {1}", teamId, newLeaderId);
+            cmd.ExecuteNonQuery();
+        }
     }
 }

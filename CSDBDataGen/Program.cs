@@ -162,11 +162,15 @@ namespace CSDBDataGen
             GenLeaders(conn, 1, ref personIds, ref auxList2, leaderMinBD, leaderMaxBD, startDate, 'M', true);
             leaderIds.AddRange(auxList);
             CSDBDataGenLibrary.TeamGenerator.Generate(conn, ref teamIds, divisionIds[0], auxList, auxList2, 'M', startDate);
+            auxList.Clear();
+            personIds.Clear();
+            GenLeaders(conn, 1, ref personIds, ref auxList, leaderMinBD, leaderMaxBD, startDate, 'M');
+            CSDBDataGenLibrary.TeamGenerator.ReplaceLeader(conn, teamIds[0], auxList[0], false, new DateTime(2021, 2, 3));
 
             // Scouts
             personIds.Clear();
             GenScouts(conn, 10, ref personIds, ref scoutIds, leaderMinBD, leaderMaxBD, startDate, 'M', teamIds[0]);
-            CSDBDataGenLibrary.PersonGenerator.Pause(conn, personIds, new DateTime(2020, 1, 1), new DateTime(2021, 1, 1), 0);
+            CSDBDataGenLibrary.PersonGenerator.Pause(conn, personIds, new DateTime(2020, 1, 1), new DateTime(2021, 1, 1), teamIds[0]);
 
             System.Console.WriteLine("End");
         }
