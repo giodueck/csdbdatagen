@@ -1,6 +1,6 @@
 using System;
 
-namespace CSDBDataGenLibrary
+namespace DBDataGenLibrary
 {
     public class PlaceNameGenerator
     {

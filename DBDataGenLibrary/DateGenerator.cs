@@ -1,7 +1,7 @@
 using System;
 using Npgsql;
 
-namespace CSDBDataGenLibrary
+namespace DBDataGenLibrary
 {
     public class DateGenerator
     {

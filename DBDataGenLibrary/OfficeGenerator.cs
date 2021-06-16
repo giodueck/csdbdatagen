@@ -2,7 +2,7 @@ using System;
 using Npgsql;
 using System.Collections.Generic;
 
-namespace CSDBDataGenLibrary
+namespace DBDataGenLibrary
 {
     public class OfficeGenerator
     {
