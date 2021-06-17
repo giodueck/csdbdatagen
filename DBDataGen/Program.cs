@@ -233,9 +233,10 @@ namespace CSDBDataGen
 
         // Generates the given number of offices with the given numbers to make it up
         // Assumes that awards, their requirements, and division_categories are already generated
-        static void GenerateWithProgress(NpgsqlConnection conn, List<long> awardList, List<long> reqList, List<long> divCatList, int officeCount = 40, int outpostCount = 50, int teamCount = 10, int scoutCount = 5)
+        static void GenerateWithProgress(NpgsqlConnection conn, int threadCount, List<long> awardList, List<long> reqList, List<long> divCatList, int officeCount = 40, int outpostCount = 50, int teamCount = 10, int scoutCount = 5)
         {
             Console.Write("Generating data... ");
+
             using (var progress = new ProgressBar()) {
                 for (int i = 1; i <= officeCount; i++) {
                     GenerateOffice(conn, progress, (double) i / officeCount, awardList, reqList, divCatList, outpostCount, teamCount, scoutCount);
@@ -269,23 +270,10 @@ namespace CSDBDataGen
             var expeditionReqIds = new List<long>();
             var divisionCategoryIds = new List<long>();
             var divisionCategoryNames = new List<string>();
-            var personIds = new List<long>();
-            var leaderIds = new List<long>();
-            var scoutIds = new List<long>();
-            var officeIds = new List<long>();
-            var outpostIds = new List<long>();
-            var divisionIds = new List<long>();
-            var teamIds = new List<long>();
-
-            var auxList = new List<long>();
-            var auxList2 = new List<long>();
 
             // Useful variables
             int i, j;
             int awardCount = 4, reqCount = 2;
-            var leaderMinBD = new DateTime(1971, 1, 1);
-            var leaderMaxBD = new DateTime(2003, 12, 31);
-            var startDate = new DateTime(2020, 1, 1);
 
             // Clear database for testing
             // cmd.CommandText = "SELECT * FROM clearall()";
@@ -316,7 +304,7 @@ namespace CSDBDataGen
             }
             System.Console.WriteLine("Done!");
 
-            GenerateWithProgress(conn, awardIds, requirementIds, divisionCategoryIds, 10);
+            GenerateWithProgress(conn, 10, awardIds, requirementIds, divisionCategoryIds);
         }
     }
 }

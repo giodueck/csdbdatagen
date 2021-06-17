@@ -187,7 +187,7 @@ namespace DBDataGenLibrary
             }
 
             // join team
-            if (teamId > 0)
+            if (teamId != 0)
             {
                 foreach (long scout_id in scoutIds)
                     JoinTeam(conn, scout_id, teamId, startDate);
@@ -246,6 +246,7 @@ namespace DBDataGenLibrary
                     reader.Read();
                     reader.GetInt64(0).ToString();  // will throw exception if team_id is null
                     scout_id = reader.GetInt64(1);
+                    list.Add(scout_id);
                     reader.Close();
                     LeaveTeam(conn, scout_id, pauseDate);
                 }
@@ -281,15 +282,11 @@ namespace DBDataGenLibrary
             var cmd = new NpgsqlCommand();
             cmd.Connection = conn;
 
-            string sql = "INSERT INTO scout_team_history (scout_team_history_id, team_id, scout_id, join_date) VALUES ";
+            string sql = "INSERT INTO scout_team_history (team_id, scout_id, join_date) VALUES ";
 
-            long scout_team_history_id;
+            sql += string.Format("({0}, {1}, '{2}');", teamId, scoutId, joinDate);
 
-            // Get next scout_team_history_id
-            cmd.CommandText = "SELECT * FROM nextval('scout_team_history_scout_team_history_id_seq')";
-            scout_team_history_id = (long)cmd.ExecuteScalar();
-
-            sql += string.Format("({0}, {1}, {2}, '{3}')", scout_team_history_id, teamId, scoutId, joinDate);
+            sql += string.Format("UPDATE scout SET team_id = {0} WHERE scout_id = {1}", teamId, scoutId);
 
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
